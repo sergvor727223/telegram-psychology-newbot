@@ -76,7 +76,7 @@ def handle_message(message):
                 {"role": "system", "content": SYSTEM_PROMPT},
                 {"role": "user", "content": message.text}
             ],
-            max_tokens=300,
+            max_tokens=1000,
             temperature=0.7
         )
         
@@ -89,7 +89,13 @@ def handle_message(message):
             bot_response
         )
         
-        bot.reply_to(message, bot_response)
+        # Разбивка длинного ответа на части (если больше 4000 символов)
+        if len(bot_response) > 4000:
+            for chunk in [bot_response[i:i+4000] for i in range(0, len(bot_response), 4000)]:
+                bot.send_message(message.chat.id, chunk)
+        else:
+            bot.reply_to(message, bot_response)
+            
         logger.info(f"Обработано сообщение от {message.from_user.username}")
 
     except Exception as e:
